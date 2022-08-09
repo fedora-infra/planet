@@ -77,32 +77,25 @@
     %>
     <div class="row m-b-3">
         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 text-sm-center">
-            <!-- TO DO: show author's profile picture -->
-            <TMPL_IF channel_face>
-                <img class="hackergotchi" src="<TMPL_VAR channel_face ESCAPE="HTML">" <TMPL_IF channel_facewidth>width="<TMPL_VAR channel_facewidth>" </TMPL_IF><TMPL_IF channel_faceheight>height="<TMPL_VAR channel_faceheight>" </TMPL_IF>alt="">
-            </TMPL_IF>
+            <% if item.feed.avatar %>
+                <img class="hackergotchi" src="<%= item.feed.avatar %>" width="100" height="100" alt="">
+            <% end %>
         </div>
         <div class="col-xl-10 col-lg-9 col-md-8 col-sm-8">
-            <!-- TO DO: should have author name after blog-entry -->
             <div class="blog-entry <%= item.feed.title %>">
                 <div class="blog-entry-post card">
                     <div class="card-block">
                     <div class="blog-entry-header m-b-2">
                         <h2>
-                        <!-- <a href="<TMPL_VAR link>">
-                        <TMPL_IF title><TMPL_VAR title><TMPL_ELSE>Untitled Post</TMPL_IF>
-                        </a> -->
                         <% if item.url %>
                             <%= link_to item.title, item.url %>
                         <% else %>
                             Untitled Post
                         <% end %>
                         </h2>
-                        <!-- TO DO: should have link to author blog and name of the author 
-                        <small>Posted by <a href="<TMPL_VAR channel_link ESCAPE="HTML">"><TMPL_VAR channel_name></a> -->
-                        <small>Posted by <%= link_to item.name, item.url %>
-                        <span class="fas-account">(<img src="https://fedoraproject.org/w/uploads/a/ac/Infra-icon_fas.png" alt="Fedora Account System Username" name="Fedora Account System Username"><a href="https://accounts.fedoraproject.org/user/<TMPL_VAR channel_fasname ESCAPE="HTML">"><TMPL_VAR channel_fasname ESCAPE="HTML"></a>)</span>
-                        on <%= link_to item.published, item.url %>
+                        <small>Posted by <%= link_to item.feed.name, item.feed.url %>
+                        <span class="fas-account">( <img src="https://fedoraproject.org/w/uploads/a/ac/Infra-icon_fas.png" alt="Fedora Account System Username" name="Fedora Account System Username"><a href="https://accounts.fedoraproject.org/user/<%= item.feed.author %>"><%= item.feed.author %></a> )</span>
+                        on <%= link_to item.published, item.url %> 
                         </small>
                     </div>
                     <div class="blog-entry-content-container">

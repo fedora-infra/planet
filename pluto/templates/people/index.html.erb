@@ -3,18 +3,17 @@
 
 <head>
     <title><%= site.title %></title>
-
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
-    <meta http-equiv="Content-Type" content="text/html">
-    <meta name="MSSmartTagsPreventParsing" content="TRUE">
-    <link rel="stylesheet" type="text/css" media="all" href="https://apps.fedoraproject.org/global/fedora-bootstrap-1.0.1/fedora-bootstrap.css">
-    <link rel="stylesheet" type="text/css" media="all" href="/css-v2/fedora_planet.css">
-    <link rel="stylesheet" type="text/css" media="all" href="/css-v2/fonts/fonts.css">
-    <link rel="stylesheet" type="text/css" media="all" href="/css-v2/hack_fonts/css/hack-extended-2.020.css">
-    <link rel="shortcut icon" href="/images-v2/favicon.ico">
-    <link rel="icon" href="/images-v2/favicon.ico">
-    <link rel="alternate" type="application/xml" title="RSS" href="https://fedoraproject.org/people/rss20.xml">
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html">
+        <meta name="MSSmartTagsPreventParsing" content="TRUE">
+        <link rel="stylesheet" type="text/css" media="all" href="https://apps.fedoraproject.org/global/fedora-bootstrap-1.0.1/fedora-bootstrap.css">
+        <link rel="stylesheet" type="text/css" media="all" href="/css-v2/fedora_planet.css">
+        <link rel="stylesheet" type="text/css" media="all" href="/css-v2/fonts/fonts.css">
+        <link rel="stylesheet" type="text/css" media="all" href="/css-v2/hack_fonts/css/hack-extended-2.020.css">
+        <link rel="shortcut icon" href="/images-v2/favicon.ico">
+        <link rel="icon" href="/images-v2/favicon.ico">
+        <link rel="alternate" type="application/xml" title="RSS" href="https://fedoraproject.org/people/rss20.xml">
     <link rel="alternate" type="application/atom+xml" title="Fedora People Atom 1.0" href="https://fedoraproject.org/people/atom.xml">
 </head>
 
@@ -47,31 +46,29 @@
 </div>
 
 
-
 <div class="bodycontent">
     <div class="container p-t-2">
-        <div>
-            <h2 class="p-b-2"><%= site.title %></h2>
+    <div>
+        <h2 class="p-b-2"><%= site.title %>
+        <div class="btn-group pull-xs-right" role="group" aria-label="Button group with nested dropdown">
+            <a class="btn btn-sm btn-secondary" href="heads.html">Blog List</a>
 
-            <div class="btn-group pull-xs-right" role="group" aria-label="Button group with nested dropdown">
-                <a class="btn btn-sm btn-secondary" href="heads.html">Blog List</a>
+            <div class="btn-group" role="group">
+            <button id="btnGroup-feeds" type="button" class="btn btn-sm btn-secondary dropdown-toggle" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                Feeds
+            </button>
 
-                <div class="btn-group" role="group">
-
-                    <button id="btnGroup-feeds" type="button" class="btn btn-sm btn-secondary dropdown-toggle" 
-                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                        Feeds
-                    </button>
-
-                    <div class="dropdown-menu" aria-labelledby="btnGroup-feeds">
-                        <a class="dropdown-item" href="rss10.xml">RSS 1.0</a>
-                        <a class="dropdown-item" href="rss20.xml">RSS 2.0</a>
-                        <a class="dropdown-item" href="atom.xml">Atom 1.0</a>
-                        <a class="dropdown-item" href="foafroll.xml">FOAF blogroll</a>
-                    </div>
-                </div>
+            <div class="dropdown-menu" aria-labelledby="btnGroup-feeds">
+                <a class="dropdown-item" href="rss10.xml">RSS 1.0</a>
+                <a class="dropdown-item" href="rss20.xml">RSS 2.0</a>
+                <a class="dropdown-item" href="atom.xml">Atom 1.0</a>
+                <a class="dropdown-item" href="foafroll.xml">FOAF blogroll</a>
+            </div>
             </div>
         </div>
+        </h2>
+
+    </div>
 
 
     <%
@@ -80,60 +77,54 @@
     %>
     <div class="row m-b-3">
         <div class="col-xl-2 col-lg-3 col-md-4 col-sm-4 text-sm-center">
-            <!-- TO DO: Show author's profile picture -->
-            <img class="hackergotchi" src="<TMPL_VAR channel_face ESCAPE='HTML'>" width="64" height="64" alt="">
+            <!-- TO DO: show author's profile picture -->
+            <TMPL_IF channel_face>
+                <img class="hackergotchi" src="<TMPL_VAR channel_face ESCAPE="HTML">" <TMPL_IF channel_facewidth>width="<TMPL_VAR channel_facewidth>" </TMPL_IF><TMPL_IF channel_faceheight>height="<TMPL_VAR channel_faceheight>" </TMPL_IF>alt="">
+            </TMPL_IF>
         </div>
         <div class="col-xl-10 col-lg-9 col-md-8 col-sm-8">
             <!-- TO DO: should have author name after blog-entry -->
-            <div class="blog-entry "> 
+            <div class="blog-entry <%= item.feed.title %>">
                 <div class="blog-entry-post card">
                     <div class="card-block">
-
-                        <div class="blog-entry-header m-b-2">
-                            <h2>
-                                <% if item.url %>
-                                    <%= link_to item.title, item.url %>
-                                <% else %>
-                                    Untitled Post
-                                <% end %>
-                            </h2>
-                            <!-- TO DO: should have link to author blog and name of the author -->
-                            <small>Posted by <a href="<TMPL_VAR channel_link ESCAPE='HTML'>"><TMPL_VAR channel_name></a>
-                                <!-- TO DO: should have link to author blog and name of the author -->
-                                <span class="fas-account">
-                                    (<img src="https://fedoraproject.org/w/uploads/a/ac/Infra-icon_fas.png" alt="Fedora Account System Username" name="Fedora Account System Username">
-                                    <a href="https://accounts.fedoraproject.org/user/<TMPL_VAR channel_fasname ESCAPE="HTML">"><TMPL_VAR channel_fasname ESCAPE="HTML"></a>)
-                                </span>
-                                on <%= link_to item.published, item.url %>
-                            </small>
-                        </div>
-
-                        <div class="blog-entry-content-container">
-                            <div class="blog-entry-content">
-                                <% if item.content %>
-                                    <%= item.content %>
-                                <% elsif item.summary %>
-                                    <%= item.summary %>
-                                <% else %>
-                                    -/-
-                                <% end %>
-                            </div>
-                        </div>
-
+                    <div class="blog-entry-header m-b-2">
+                        <h2>
+                        <!-- <a href="<TMPL_VAR link>">
+                        <TMPL_IF title><TMPL_VAR title><TMPL_ELSE>Untitled Post</TMPL_IF>
+                        </a> -->
+                        <% if item.url %>
+                            <%= link_to item.title, item.url %>
+                        <% else %>
+                            Untitled Post
+                        <% end %>
+                        </h2>
+                        <!-- TO DO: should have link to author blog and name of the author 
+                        <small>Posted by <a href="<TMPL_VAR channel_link ESCAPE="HTML">"><TMPL_VAR channel_name></a> -->
+                        <small>Posted by <%= link_to item.name, item.url %>
+                        <span class="fas-account">(<img src="https://fedoraproject.org/w/uploads/a/ac/Infra-icon_fas.png" alt="Fedora Account System Username" name="Fedora Account System Username"><a href="https://accounts.fedoraproject.org/user/<TMPL_VAR channel_fasname ESCAPE="HTML">"><TMPL_VAR channel_fasname ESCAPE="HTML"></a>)</span>
+                        on <%= link_to item.published, item.url %>
+                        </small>
                     </div>
+                    <div class="blog-entry-content-container">
+                        <div class="blog-entry-content">
+                            <% if item.content %>
+                                <%= item.content %>
+                            <% elsif item.summary %>
+                                <%= item.summary %>
+                            <% else %>
+                                -/-
+                            <% end %>
+                        </div>
+                    </div>
+                </div>
                 </div>
             </div>
         </div>
+        </div>
+        <% end %>
     </div>
 
-    </div>
-
-    
-    <% end %>
-</div>
-
-
-
+      
 <div class="footer p-t-2 p-b-2">
     <div class="container text-muted text-xs-center">
         <p class="copy">&copy; 2016 Red Hat, Inc. and others. Please send any comments or corrections to the <a href="mailto:webmaster@fedoraproject.org">websites team</a>.</p>
@@ -145,7 +136,6 @@
 <script src="https://apps.fedoraproject.org/fedmenu/js/jquery-1.11.2.min.js"></script>
 <script src="https://apps.fedoraproject.org/fedmenu/js/fedmenu.js"></script>
 <script type="text/javascript" src="https://apps.fedoraproject.org/global/fedora-bootstrap-1.0.1/fedora-bootstrap.js"></script>
-
 <script>
 fedmenu({
     'url': 'https://apps.fedoraproject.org/js/data.js',

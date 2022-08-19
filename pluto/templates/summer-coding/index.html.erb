@@ -40,9 +40,12 @@
                 <h2>People</h2>
                 <ul id="people_feeds">
 
-                <TMPL_LOOP Channels>
-                    <li><a href="<TMPL_VAR url ESCAPE="HTML">"><img src="images/rss.png" alt="RSS"></a><a href="<TMPL_VAR link ESCAPE="HTML">" title="<TMPL_VAR title ESCAPE="HTML">"><TMPL_VAR name ESCAPE="HTML"></a></li>
-                </TMPL_LOOP>
+                <% site.feeds.each do |feed| %>
+                    <li>
+                    <a href="<%= feed.feed_url %>"><img src="images/rss.png" alt="RSS"></a>
+                    <a href="<%= feed.link %>" title="<%= feed.title %>"><%= feed.title %> </a>
+                    </li>
+                <% end %>
                 </ul>
 
                 <h2>Add your blog</h2>
@@ -54,43 +57,62 @@
 
         <div id="content">
             <div class="spacer">
-        <TMPL_LOOP Items>
+        <%
+            items = site.items.latest.limit(24)
+            ItemCursor.new( items ).each do |item, new_date, new_feed|
+        %>
 
-            <TMPL_IF new_date>
+            <% if new_date %>
             </div> <!-- :-} -->
 
             <div class="blog-entries-daily">
-            <h2 class="blog-date"><TMPL_VAR new_date></h2>
-            </TMPL_IF>
+            <h2 class="blog-date"><%= new_date %></h2>
+            <% end %>
 
 
-            <div class="blog-entry <TMPL_VAR channel_name>">
+            <div class="blog-entry <%= item.feed.name %>">
                 <div class="blog-entry-post">
                     <div class="blog-entry-header">
                         <div class="blog-entry-author">
 
-                            <TMPL_IF channel_face>
-                                <img src="<TMPL_VAR channel_face ESCAPE="HTML">" <TMPL_IF channel_facewidth>width="<TMPL_VAR channel_facewidth>" </TMPL_IF><TMPL_IF channel_faceheight>height="<TMPL_VAR channel_faceheight>" </TMPL_IF>alt="">
-                                <br><a href="<TMPL_VAR channel_link ESCAPE="HTML">"><TMPL_VAR channel_name></a>
+                            <% if item.feed.avatar %>
+                                <img src="<%= item.feed.avatar %>" width="100" height="100" alt="">
+                                <br><%= link_to item.feed.name, item.feed.url %>
 
-                            </TMPL_IF>
+                            <% end %>
 
                         </div>
 
-                        <div class="blog-entry-title"><a href="<TMPL_VAR link>"><TMPL_IF title><TMPL_VAR title><TMPL_ELSE>Untitled Post</TMPL_IF></a></div>
+                        <div class="blog-entry-title">
+                        <% if item.url %>
+                            <%= link_to item.title, item.url %>
+                        <% else %>
+                            Untitled Post
+                        <% end %>
+                        </div>
                     </div>
 
                     <div class="blog-entry-content-container">
 
-                        <div class="blog-entry-content"><TMPL_VAR content></div>
+                        <div class="blog-entry-content">
+                        <% if item.content %>
+                            <%= item.content %>
+                        <% elsif item.summary %>
+                            <%= item.summary %>
+                        <% else %>
+                            -/-
+                        <% end %>
+                        </div>
 
                     </div>
                     <div class="blog-entry-footer">
-                    <div class="blog-entry-timestamp"><a href="<TMPL_VAR link ESCAPE="HTML">"><TMPL_IF creator>by <TMPL_VAR creator> at </TMPL_IF><TMPL_VAR date></a></div>
+                    <div class="blog-entry-timestamp">
+                        <%= link_to item.feed.name, item.feed.url %> at <%= item.published %>
+                    </div>
                     </div>
                 </div>
             </div>
-    </TMPL_LOOP>
+        <% end %>
         </div>
     </div>
 </div>

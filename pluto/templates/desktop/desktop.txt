@@ -1,0 +1,3 @@
+# Desktop planet template manifest
+
+index.html  index.html.erb

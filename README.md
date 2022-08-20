@@ -4,21 +4,16 @@ This repo contains Fedora Planet website. Fedora Planet is a distributed communi
 
 ## Getting Started
 
-Fedora Planet is under development now and it's feedreader is being migrated from venus to pluto
+Fedora Planet is under development now and it's feedreader is being migrated from venus to pluto.
+
 To provision the container go to the `Dockerfile` directory and run the following commands:
 
 ```sh
 $ sudo podman build -t <image name>:<image version> .
-$ sudo podman run -it --name <container name> -p 8080:80 <image name>:<image version>
+$ sudo podman run -dit --name <container name> -p 8080:80 <image name>:<image version>
 ```
 
-When its over you will be in the container. Run apache:
-
-```sh
-httpd -D FOREGROUND
-```
-
-Then go to the web browser and see how it's running by typing `localhost:8080` in the URL.
+When its over the container will be running Fedora Planet website. Go to the web browser and see how it's working by typing `localhost:8080` in the URL.
 
 ## How it works
 

@@ -7,9 +7,10 @@
 	xmlns="http://purl.org/rss/1.0/"
 >
 <channel rdf:about="<TMPL_VAR link ESCAPE="HTML">">
-	<title><TMPL_VAR name></title>
+	<!-- <title><TMPL_VAR name></title> -->
+    <title><%= site.title %></title>
     <link><TMPL_VAR link ESCAPE="HTML"></link>
-        <description>Fedora People: http://fedoraplanet.org/summer-coding</description>
+        <description>Fedora People: http://fedoraplanet.org</description>
 	<items>
 		<rdf:Seq>
 <TMPL_LOOP Items>

@@ -1,3 +1,0 @@
-# Summer-coding planet template manifest
-
-index.html  index.html.erb

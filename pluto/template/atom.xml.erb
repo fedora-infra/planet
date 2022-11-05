@@ -1,14 +1,17 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-	<title><TMPL_VAR name></title>
-	<link rel="self" href="<TMPL_VAR feed ESCAPE="HTML">"/>
-	<link href="<TMPL_VAR link ESCAPE="HTML">"/>
-	<id><TMPL_VAR feed ESCAPE="HTML"></id>
+	<title><%= site.title %></title>
+	<link rel="self" href="https://fedoraproject.org/people/rss20.xml"/>
+	<link href="https://fedoraproject.org/people/"/>
+	<id>https://fedoraproject.org/people/rss20.xml</id>
 	<updated><TMPL_VAR date_iso></updated>
 	<generator uri="http://fedoraplanet.org/"><TMPL_VAR generator ESCAPE="HTML"></generator>
 
-<TMPL_LOOP Items>
+<%
+    items = site.items.latest.limit(50)
+    ItemCursor.new( items ).each do |item, new_date, new_feed|
+%>
 	<entry<TMPL_IF channel_language> xml:lang="<TMPL_VAR channel_language>"</TMPL_IF>>
 		<title type="html"<TMPL_IF title_language> xml:lang="<TMPL_VAR title_language>"</TMPL_IF>><TMPL_VAR title ESCAPE="HTML"></title>
 		<link href="<TMPL_VAR link ESCAPE="HTML">"/>
@@ -60,5 +63,5 @@
 		</source>
 	</entry>
 
-</TMPL_LOOP>
+<% end %>
 </feed>

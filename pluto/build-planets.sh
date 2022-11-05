@@ -1,6 +1,6 @@
 #!/bin/sh
 
-GALAXY='/pluto/builds'
+GALAXY='/pluto/build'
 
 mkdir -p /root/.pluto/
 mv template/ /root/.pluto/planet

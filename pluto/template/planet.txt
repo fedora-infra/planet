@@ -1,0 +1,9 @@
+# Fedora planet template manifest
+
+index.html  index.html.erb
+atom.xml  atom.xml.erb
+foafroll.xml  foafroll.xml.erb
+heads.html  heads.html.erb
+opml.xml  opml.xml.erb
+rss10.xml  rss10.xml.erb
+rss20.xml  rss20.xml.erb

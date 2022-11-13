@@ -2,19 +2,19 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
     <channel>
         <atom:link href="<%= site.url %>/rss20.xml" rel="self" type="application/rss+xml" />
-        <title><%= site.title %></title>
-        <link><%= site.url %>/people</link>
+        <title><%= CGI.escapeHTML(site.title) %></title>
+        <link><%= CGI.escapeHTML(site.url) %></link>
         <language>en</language>
-        <description><%= site.title %>: <%= site.url %></description>
+        <description><%= CGI.escapeHTML(site.title) %><% if site.url %>: <%= CGI.escapeHTML(site.url) %><% end %></description>
 
         <%
         items = site.items.latest.limit(24)
         ItemCursor.new( items ).each do |item, new_date, new_feed|
         %>
         <item>
-            <title><%= item.feed.title %><% if item.name %>: <%= item.name %><% end %></title>
-            <guid isPermaLink="false"><%= item.guid %></guid>
-            <link><%= item.link %></link>
+            <title><%= CGI.escapeHTML(item.feed.title) %><% if item.name %>: <%= CGI.escapeHTML(item.name) %><% end %></title>
+            <guid isPermaLink="false"><%= CGI.escapeHTML(item.guid) %></guid>
+            <link><%= CGI.escapeHTML(item.link) %></link>
 
             <% if item.content %>
             <description>
@@ -25,7 +25,7 @@
             </description>
             <% end %>
 
-            <pubDate><%= item.published %></pubDate>
+            <pubDate><%= CGI.escapeHTML(item.published.to_datetime.rfc3339) %></pubDate>
         </item>
         <% end %>
 

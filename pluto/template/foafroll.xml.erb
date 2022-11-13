@@ -8,8 +8,8 @@
 >
 
 <foaf:Group>
-    <foaf:name><%= site.name %></foaf:name>
-    <foaf:homepage><%= site.url %></foaf:homepage>
+    <foaf:name><%= CGI.escapeHTML(site.name) %>b</foaf:name>
+    <foaf:homepage><%= CGI.escapeHTML(site.url) %></foaf:homepage>
     <rdfs:seeAlso rdf:resource="" />
 
 <% site.feeds.each do |feed| %>

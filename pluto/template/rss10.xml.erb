@@ -10,7 +10,7 @@
 <channel rdf:about="<%= CGI.escapeHTML(site.url) %>">
     <title><%= CGI.escapeHTML(site.title) %></title>
     <link><%= CGI.escapeHTML(site.url) %></link>
-    <description>Fedora People: http://fedoraplanet.org</description>
+    <description><%= CGI.escapeHTML(site.title) %><% if site.url %>: <%= CGI.escapeHTML(site.url) %><% end %></description>
     <items>
         <rdf:Seq>
             <% items = site.items.latest.limit(24)
@@ -24,10 +24,10 @@
 <% items = site.items.latest.limit(24)
 ItemCursor.new( items ).each do |item,new_date,new_feed| %>
 <item rdf:about="<%= CGI.escapeHTML(item.link) %>">
-<title><%= item.feed.name %><% if item.title %>: <%= item.title %><% end %></title>
+<title><%= CGI.escapeHTML(item.feed.name) %><% if item.title %>: <%= CGI.escapeHTML(item.title) %><% end %></title>
 <link><%= CGI.escapeHTML(item.link) %></link>
 <content:encoded><%= CGI.escapeHTML(item.content) %></content:encoded>
-<dc:date><%= item.published %></dc:date>
+<dc:date><%= CGI.escapeHTML(item.published.to_datetime.rfc3339) %></dc:date>
 </item>
 <% end %>
 

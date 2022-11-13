@@ -13,8 +13,8 @@
     <link rel="stylesheet" type="text/css" media="all" href="/css-v2/hack_fonts/css/hack-extended-2.020.css">
     <link rel="shortcut icon" href="/images-v2/favicon.ico">
     <link rel="icon" href="/images-v2/favicon.ico">
-    <link rel="alternate" type="application/xml" title="RSS" href="https://fedoraproject.org/people/rss20.xml">
-    <link rel="alternate" type="application/atom+xml" title="Fedora People Atom 1.0" href="https://fedoraproject.org/people/atom.xml">
+    <link rel="alternate" type="application/xml" title="RSS" href="<%= site.url %>">/rss20.xml">
+    <link rel="alternate" type="application/atom+xml" title="<%= site.title %> Atom 1.0" href="<%= site.url %>/atom.xml">
 </head>
 
 <body>
@@ -95,7 +95,7 @@
                         </h2>
                         <small>Posted by <%= link_to item.feed.name, item.feed.url %>
                         <span class="fas-account">( <img src="https://fedoraproject.org/w/uploads/a/ac/Infra-icon_fas.png" alt="Fedora Account System Username" name="Fedora Account System Username"><a href="https://accounts.fedoraproject.org/user/<%= item.feed.author %>"> <%= item.feed.author %></a> )</span>
-                        on <%= link_to item.published, item.url %> 
+                        on <%= link_to item.published, item.url %>
                         </small>
                     </div>
                     <div class="blog-entry-content-container">
@@ -117,7 +117,7 @@
         <% end %>
     </div>
 
-      
+
 <div class="footer p-t-2 p-b-2">
     <div class="container text-muted text-xs-center">
         <p class="copy">&copy; 2016 Red Hat, Inc. and others. Please send any comments or corrections to the <a href="mailto:webmaster@fedoraproject.org">websites team</a>.</p>

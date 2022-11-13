@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes" ?>
 <feed xmlns="http://www.w3.org/2005/Atom">
 
-    <title><%= site.title %></title>
-    <link rel="self" href="<%= site.url %>"/>
-    <link href="<%= site.url %>"/>
-    <id>https://fedoraproject.org/people/rss20.xml</id>
-    <updated><%= site.updated.to_datetime.rfc3339 %></updated>
-    <generator uri="https://feedreader.github.io/"><%= Pluto.generator %></generator>
+    <title><%= CGI.escapeHTML(site.title) %></title>
+    <link rel="self" href="<%= CGI.escapeHTML(site.url) %>"/>
+    <link href="<%= CGI.escapeHTML(site.url) %>"/>
+    <id><%= CGI.escapeHTML(site.url) %>/rss20.xml</id>
+    <updated><%= CGI.escapeHTML(site.updated.to_datetime.rfc3339) %></updated>
+    <generator uri="https://feedreader.github.io/"><%= CGI.escapeHTML(Pluto.generator) %></generator>
 
     <%
     items = site.items.latest.limit(50)
     ItemCursor.new( items ).each do |item, new_date, new_feed|
     %>
     <entry xml:lang="en">
-        <title type="html"xml:lang="en"><%= item.feed.title %><% if item.name %>: <%= item.name %><% end %></title>
+        <title type="html" xml:lang="en"><%= CGI.escapeHTML(item.feed.title) %><% if item.name %>: <%= CGI.escapeHTML(item.name) %><% end %></title>
         <link href="<%= CGI.escapeHTML(item.url) %>"/>
         <id><%= CGI.escapeHTML(item.guid) %></id>
-        <updated><%= item.published.to_datetime.rfc3339 %></updated>
+        <updated><%= CGI.escapeHTML(item.published.to_datetime.rfc3339) %></updated>
         <content type="html" xml:lang="en">
             <% if item.feed.avatar %>
             &lt;img src=&quot;<%= CGI.escapeHTML(item.feed.avatar) %>&quot; alt=&quot;&quot; style=&quot;float: right;&quot;&gt;
@@ -27,7 +27,7 @@
             <% if item.feed.author %>
             <name><%= CGI.escapeHTML(item.feed.author) %></name>
             <% if item.feed.email %>
-            <email><%= item.feed.email %></email>
+            <email><%= CGI.escapeHTML(item.feed.email) %></email>
             <% end %>
             <% else %>
             <name><%= CGI.escapeHTML(item.feed.name) %></name>
@@ -36,13 +36,13 @@
         </author>
         <source>
             <% if item.feed.title %>
-            <title type="html"><%= item.feed.title %></title>
+            <title type="html"><%= CGI.escapeHTML(item.feed.title) %></title>
             <% end %>
             <% if item.feed.subtitle %>
-            <subtitle type="html"><%= item.feed.subtitle %></subtitle>
+            <subtitle type="html"><%= CGI.escapeHTML(item.feed.subtitle) %></subtitle>
             <% end %>
             <link rel="self" href="<%= item.feed.url %>"/>
-            <id><%= item.feed.url %></id>
+            <id><%= CGI.escapeHTML(item.feed.url) %></id>
             <% if item.feed.updated %>
             <updated><%= item.feed.updated.to_datetime.rfc3339 %></updated>
             <% end %>

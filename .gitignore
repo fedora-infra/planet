@@ -1,0 +1,10 @@
+site/*.xml
+site/*.html
+site/*.db
+site/design/
+site/desktop/
+site/edited/
+site/people.db
+site/quality/
+site/security/
+site/summer-coding/

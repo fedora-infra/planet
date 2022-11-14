@@ -1,16 +1,17 @@
 #!/bin/sh
 
-GALAXY='/pluto/build'
+set -eu -o pipefail
 
-mkdir -p /root/.pluto/
-mv template/ /root/.pluto/planet
+GALAXY='./build'
 
-pushd $GALAXY
-pluto build people.ini -o /var/www/html/ -d /var/www/html/ -t planet
-for PLANET in design desktop edited quality security summer-coding; do
-    mkdir /var/www/html/$PLANET
-    ln -s /var/www/html/css-v2 /var/www/html/$PLANET/css-v2
-    ln -s /var/www/html/images-v2 /var/www/html/$PLANET/images-v2
-    pluto build $PLANET.ini -o /var/www/html/$PLANET -d /var/www/html/$PLANET -t planet
+build_dir="../../site"
+
+pushd ${GALAXY}
+pluto -c ../ build people.ini -o ${build_dir} -d ${build_dir} -t planet
+for PLANET in design desktop edited quality security ; do # TODO: add summer-coding once it works
+    mkdir -p ${build_dir}/${PLANET}
+    cp -r ${build_dir}/css-v2 ${build_dir}/${PLANET}/css-v2
+    cp -r ${build_dir}/images-v2 ${build_dir}/${PLANET}/images-v2
+    pluto -c ../ build ${PLANET}.ini -o ${build_dir}/${PLANET} -d ${build_dir}/${PLANET} -t planet
 done
 popd

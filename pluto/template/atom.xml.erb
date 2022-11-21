@@ -21,7 +21,7 @@
             <% if item.feed.avatar %>
             &lt;img src=&quot;<%= CGI.escapeHTML(item.feed.avatar) %>&quot; alt=&quot;&quot; style=&quot;float: right;&quot;&gt;
             <% end %>
-            <%= CGI.escapeHTML(item.content) %>
+            <% if item.content %><%= CGI.escapeHTML(item.content) %><% end %>
         </content>
         <author>
             <% if item.feed.author %>

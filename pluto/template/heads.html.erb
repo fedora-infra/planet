@@ -56,9 +56,11 @@
                             <div class="card text-xs-center">
                                 <div class="card-block">
                                     <div class="headsframe"><% if feed.avatar %><img src="<%= CGI.escapeHTML(feed.avatar) %>" /> <% end %></div>
+                                    <% if feed.url and feed.title %>
                                     <a href="<%= CGI.escapeHTML(feed.url) %>" title="<%= CGI.escapeHTML(feed.title) %>">
                                         <%= CGI.escapeHTML(feed.title) %>
                                     </a>
+                                    <% end %>
                                 </div>
                             </div>
                         </div>

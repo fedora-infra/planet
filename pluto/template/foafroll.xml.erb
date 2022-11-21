@@ -17,7 +17,7 @@
         <foaf:Agent>
             <foaf:name><%= CGI.escapeHTML(feed.author) %></foaf:name>
             <foaf:weblog>
-                <foaf:Document rdf:about="<%= CGI.escapeHTML(feed.link) %>">
+                <% if feed.link %><foaf:Document rdf:about="<%= CGI.escapeHTML(feed.link) %>"><% end %>
                 <dc:title><%= CGI.escapeHTML(feed.name) %></dc:title>
                 <rdfs:seeAlso>
                     <rss:channel rdf:about="<%= CGI.escapeHTML(feed.feed) %>" />

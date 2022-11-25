@@ -10,7 +10,7 @@
 
     <body>
         <% site.feeds.each do |feed| %>
-            <outline text="<%= CGI.escapeHTML(feed.title) %>" xmlUrl="<%= CGI.escapeHTML(feed.url) %>"/>
+            <outline text="<%= CGI.escapeHTML(feed.title) %>" xmlUrl="<% if feed.url %><%= CGI.escapeHTML(feed.url) %><% else %><%= CGI.escapeHTML(feed.feed) %><% end %>"/>
         <% end %>
     </body>
 </opml>

@@ -26,7 +26,7 @@ ItemCursor.new( items ).each do |item,new_date,new_feed| %>
 <item rdf:about="<%= CGI.escapeHTML(item.link) %>">
 <title><%= CGI.escapeHTML(item.feed.name) %><% if item.title %>: <%= CGI.escapeHTML(item.title) %><% end %></title>
 <link><%= CGI.escapeHTML(item.link) %></link>
-<content:encoded><%= CGI.escapeHTML(item.content) %></content:encoded>
+<content:encoded><% if item.content %><%= CGI.escapeHTML(item.content) %><% end %></content:encoded>
 <dc:date><%= CGI.escapeHTML(item.published.to_datetime.rfc3339) %></dc:date>
 </item>
 <% end %>

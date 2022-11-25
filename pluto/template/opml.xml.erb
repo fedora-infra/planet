@@ -1,16 +1,16 @@
 <?xml version="1.0"?>
 <opml version="1.1">
-	<head>
-		<title><TMPL_VAR name></title>
-		<dateCreated><TMPL_VAR date_822></dateCreated>
-		<dateModified><TMPL_VAR date_822></dateModified>
-		<ownerName><TMPL_VAR owner_name></ownerName>
-		<ownerEmail><TMPL_VAR owner_email></ownerEmail>
-	</head>
-	
-	<body>
-		<TMPL_LOOP Channels>
-		<outline text="<TMPL_VAR name ESCAPE="HTML">" xmlUrl="<TMPL_VAR url ESCAPE="HTML">"/>
-		</TMPL_LOOP>
-	</body>
+    <head>
+        <title><%= site.title %></title>
+        <dateCreated><%= site.updated.to_datetime.rfc3339 %></dateCreated>
+        <dateModified><%= site.updated.to_datetime.rfc3339 %></dateModified>
+        <ownerName>The Fedora Project</ownerName>
+        <ownerEmail>fedora-join@lists.fedoraproject.org</ownerEmail>
+    </head>
+
+    <body>
+        <% site.feeds.each do |feed| %>
+            <outline text="<%= CGI.escapeHTML(feed.title) %>" xmlUrl="<%= CGI.escapeHTML(feed.url) %>"/>
+        <% end %>
+    </body>
 </opml>

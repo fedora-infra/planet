@@ -1,36 +1,96 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
 <html>
-<TMPL_INCLUDE head.tmpl>
-  <body>
-    <TMPL_INCLUDE masthead.tmpl>
+    <head>
+        <title><%= site.title %></title>
+        <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+        <meta http-equiv="content-type" content="application/xhtml+xml; charset=UTF-8">
+        <meta http-equiv="Content-Type" content="text/html">
+        <meta name="MSSmartTagsPreventParsing" content="TRUE">
+        <link rel="stylesheet" type="text/css" media="all" href="https://apps.fedoraproject.org/global/fedora-bootstrap-1.0.1/fedora-bootstrap.css">
+        <link rel="stylesheet" type="text/css" media="all" href="/css-v2/fedora_planet.css">
+        <link rel="stylesheet" type="text/css" media="all" href="/css-v2/fonts/fonts.css">
+        <link rel="stylesheet" type="text/css" media="all" href="/css-v2/hack_fonts/css/hack-extended-2.020.css">
+        <link rel="shortcut icon" href="/images-v2/favicon.ico">
+        <link rel="icon" href="/images-v2/favicon.ico">
+        <link rel="alternate" type="application/xml" title="RSS" href="<%= site.url %>">/rss20.xml">
+        <link rel="alternate" type="application/atom+xml" title="<%= site.title %> Atom 1.0" href="<%= site.url %>/atom.xml">
+    </head>
 
-    <div class="bodycontent">
-      <div class="container p-t-3">
-        <h2>Blog list for <TMPL_VAR title></h2>
-        <div>
-          This planet aggregates feeds from <span id="blogcount"></span> different sources.
+    <body>
+        <div class="navbar navbar-full masthead">
+            <div class="container">
+                <a href="/"><img src="/images-v2/fedoraplanet_logo.png" alt="fedora" height="40px"></a>
+                <ul class="nav navbar-nav nav-pills pull-xs-right">
+                    <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">About</a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <a href="http://get.fedoraproject.org/" class="dropdown-item">Get Fedora</a>
+                            <a href="http://fedoramagazine.org" class="dropdown-item">Fedora Magazine</a>
+                            <a href="https://communityblog.fedoraproject.org/" class="dropdown-item">Fedora Community Blog</a>
+                            <a href="http://join.fedoraproject.org/" class="dropdown-item">Join Fedora</a>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" data-toggle="dropdown" href="#" role="button">Sub-Planets</a>
+                        <ul class="dropdown-menu dropdown-menu-right">
+                            <a href="/desktop" class="dropdown-item">Desktop</a>
+                            <a href="/design" class="dropdown-item">Design</a>
+                            <a href="/summer-coding" class="dropdown-item">Summer Coding</a>
+                            <a href="/security" class="dropdown-item">Security</a>
+                            <a href="/quality" class="dropdown-item">Quality</a>
+                        </ul>
+                    </li>
+                    <li class="nav-item"><a href="https://fedoraproject.org/wiki/Planet_HowTo" class="nav-link">Add Blog</a></li>
+                </ul>
+            </div>
         </div>
-        <div class="row">
-        <TMPL_LOOP Channels>
-          <div class="col-xl-3 col-lg-4 col-md-6">
 
-          <div class="card text-xs-center">
-              <div class="card-block">
-                  <div class="headsframe"><img src="<TMPL_VAR face ESCAPE="HTML">" /></div>
-                    <a href="<TMPL_VAR link ESCAPE="HTML">" title="<TMPL_VAR title ESCAPE="HTML">">
-                      <TMPL_VAR name ESCAPE="HTML">
-                    </a>
-              </div>
-          </div>
-        </div>
-
-
-        </TMPL_LOOP>
+        <div class="bodycontent">
+            <div class="container p-t-3">
+                <h2>Blog list for <%= site.title %></h2>
+                <div>
+                    This planet aggregates feeds from <span id="blogcount"></span> different sources.
                 </div>
-      </div>
-    </div>
-    <TMPL_INCLUDE footer.tmpl>
-    <TMPL_INCLUDE scripts.tmpl>
+                <div class="row">
+                    <% site.feeds.each do |feed| %>
+                        <div class="col-xl-3 col-lg-4 col-md-6">
 
-</body>
+                            <div class="card text-xs-center">
+                                <div class="card-block">
+                                    <div class="headsframe"><% if feed.avatar %><img src="<%= CGI.escapeHTML(feed.avatar) %>" /> <% end %></div>
+                                    <a href="<%= CGI.escapeHTML(feed.url) %>" title="<%= CGI.escapeHTML(feed.title) %>">
+                                        <%= CGI.escapeHTML(feed.title) %>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    <% end %>
+                </div>
+            </div>
+        </div>
+
+        <div class="footer p-t-2 p-b-2">
+            <div class="container text-muted text-xs-center">
+                <p class="copy">&copy; 2016 Red Hat, Inc. and others. Please send any comments or corrections to the <a href="mailto:webmaster@fedoraproject.org">websites team</a>.</p>
+                <p class="disclaimer">The Fedora Project is maintained and driven by the community and sponsored by Red Hat. This is a community maintained site. Red Hat is not responsible for content.</p>
+                <p class="disclaimer">Your words are your own, duh. Nothing here represents Fedora™, Red Hat, Inc, or pretty much anything else. If you think it does then you are badly misled</p>
+            </div>
+        </div>
+
+        <script src="https://apps.fedoraproject.org/fedmenu/js/jquery-1.11.2.min.js"></script>
+        <script src="https://apps.fedoraproject.org/fedmenu/js/fedmenu.js"></script>
+        <script type="text/javascript" src="https://apps.fedoraproject.org/global/fedora-bootstrap-1.0.1/fedora-bootstrap.js"></script>
+        <script>
+         fedmenu({
+             'url': 'https://apps.fedoraproject.org/js/data.js',
+             'mimeType': 'application/javascript',
+             'position': 'bottom-right',
+         });
+         $( document ).ready(function() {
+             if ($("#blogcount").length){
+                 $("#blogcount").text($(".card").length)
+             }
+         });
+        </script>
+
+
+    </body>
 </html>

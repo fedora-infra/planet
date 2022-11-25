@@ -1,15 +1,15 @@
 GEM
   remote: https://rubygems.org/
   specs:
-    activemodel (6.1.4)
-      activesupport (= 6.1.4)
-    activerecord (6.1.4)
-      activemodel (= 6.1.4)
-      activesupport (= 6.1.4)
+    activemodel (6.1.4.4)
+      activesupport (= 6.1.4.4)
+    activerecord (6.1.4.4)
+      activemodel (= 6.1.4.4)
+      activesupport (= 6.1.4.4)
     activerecord-utils (0.4.1)
       activerecord
       logutils
-    activesupport (6.1.4)
+    activesupport (6.1.4.4)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 1.6, < 2)
       minitest (>= 5.1)
@@ -17,7 +17,7 @@ GEM
       zeitwerk (~> 2.3)
     activityutils (0.1.2)
       logutils (>= 0.6.1)
-    concurrent-ruby (1.1.9)
+    concurrent-ruby (1.1.10)
     date-formatter (0.1.1)
     feedfilter (1.1.1)
       textutils (>= 1.0.1)
@@ -27,7 +27,7 @@ GEM
     fetcher (0.4.5)
       logutils (>= 0.6)
     gli (2.20.1)
-    i18n (1.8.10)
+    i18n (1.12.0)
       concurrent-ruby (~> 1.0)
     iniparser (1.0.1)
     liquid (5.0.1)
@@ -35,7 +35,7 @@ GEM
     logutils-activerecord (0.2.1)
       activerecord
       logutils (>= 0.6.1)
-    minitest (5.14.4)
+    minitest (5.16.3)
     opmlparser (1.0.1)
     pakman (1.1.0)
       fetcher (>= 0.4.5)
@@ -89,17 +89,17 @@ GEM
       logutils (>= 0.6.1)
       props (>= 1.1.2)
       rubyzip (>= 1.0.0)
-    tzinfo (2.0.4)
+    tzinfo (2.0.5)
       concurrent-ruby (~> 1.0)
-    zeitwerk (2.4.2)
+    zeitwerk (2.6.6)
 
 PLATFORMS
   x86_64-linux
 
 DEPENDENCIES
+  activerecord (= 6.1.4.4)
   pluto
   rss
 
 BUNDLED WITH
    2.2.22
-   

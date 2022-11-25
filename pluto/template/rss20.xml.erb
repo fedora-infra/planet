@@ -1,32 +1,33 @@
 <?xml version="1.0"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-<channel>
-   <atom:link href="http://fedoraplanet.org/rss20.xml" rel="self" type="application/rss+xml" />
-	<title><%= site.title %></title>
-	<link>https://fedoraproject.org/people/</link>
-	<language>en</language>
-        <description>Fedora People: http://fedoraplanet.org</description>
+    <channel>
+        <atom:link href="<%= site.url %>/rss20.xml" rel="self" type="application/rss+xml" />
+        <title><%= CGI.escapeHTML(site.title) %></title>
+        <link><%= CGI.escapeHTML(site.url) %></link>
+        <language>en</language>
+        <description><%= CGI.escapeHTML(site.title) %><% if site.url %>: <%= CGI.escapeHTML(site.url) %><% end %></description>
 
-<%
-    items = site.items.latest.limit(24)
-    ItemCursor.new( items ).each do |item, new_date, new_feed|
-%>
-<item>
-	<!-- <title><TMPL_VAR channel_name><TMPL_IF title>: <TMPL_VAR title></TMPL_IF></title> -->
-    <title><%= item.feed.title %><% if item.name %>: <%= item.name %><% end %></title>
-	<!-- <guid isPermaLink="false"><TMPL_VAR id ESCAPE="HTML"></guid> 
-	<link><TMPL_VAR link ESCAPE="HTML"></link> -->
-	<% if item.content %>
+        <%
+        items = site.items.latest.limit(24)
+        ItemCursor.new( items ).each do |item, new_date, new_feed|
+        %>
+        <item>
+            <title><%= CGI.escapeHTML(item.feed.title) %><% if item.name %>: <%= CGI.escapeHTML(item.name) %><% end %></title>
+            <guid isPermaLink="false"><%= CGI.escapeHTML(item.guid) %></guid>
+            <link><%= CGI.escapeHTML(item.link) %></link>
 
-	<description>
-		<% if item.feed.avatar %>
-			&lt;img src=&quot;<TMPL_VAR channel_face ESCAPE="HTML">&quot; <TMPL_IF channel_facewidth>width=&quot;<TMPL_VAR channel_facewidth>&quot; </TMPL_IF><TMPL_IF channel_faceheight>height=&quot;<TMPL_VAR channel_faceheight>&quot; </TMPL_IF> alt=&quot;&quot; style=&quot;float: right;&quot;&gt;
-		<% end %>
-		<%= item.content %></description>
-	<% end %>
-	<pubDate><%= item.published %></pubDate>
-</item>
-<% end %>
+            <% if item.content %>
+            <description>
+                <% if item.feed.avatar %>
+                &lt;img src=&quot;<%= CGI.escapeHTML(item.feed.avatar) %>&quot; alt=&quot;<%= CGI.escapeHTML(item.feed.name)%>&#39;s avatar&quot; style=&quot;float: right;&quot;&gt;
+                <% end %>
+                <%= CGI.escapeHTML(item.content) %>
+            </description>
+            <% end %>
 
-</channel>
+            <pubDate><%= CGI.escapeHTML(item.published.to_datetime.rfc3339) %></pubDate>
+        </item>
+        <% end %>
+
+    </channel>
 </rss>

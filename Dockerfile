@@ -1,6 +1,12 @@
-FROM fedora:36
+FROM fedora:37
 
-RUN dnf update -y && dnf install -y httpd rubygems gcc sqlite-devel ruby-devel
+RUN dnf update -y && \
+    dnf install -y httpd rubygems gcc sqlite-devel ruby-devel && \
+    dnf clean all 
+
+RUN sed -i 's/Listen 80$/Listen 8080/g' /etc/httpd/conf/httpd.conf && \
+    chgrp -R 0 /run/httpd && \
+    chmod -R g+rwX /etc/httpd /var/log/httpd /run/httpd
 
 COPY site site
 COPY pluto pluto
@@ -12,7 +18,7 @@ RUN ./build-planets.sh
 WORKDIR /
 RUN mv site/* /var/www/html/
 
-EXPOSE 80
+EXPOSE 8080
 
 ENTRYPOINT ["/usr/sbin/httpd"]
-CMD ["-D","FOREGROUND"]
+CMD ["-D","FOREGROUND","-f","/etc/httpd/conf/httpd.conf"]

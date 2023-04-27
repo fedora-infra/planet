@@ -8,6 +8,7 @@ build_dir="../../site"
 
 pushd ${GALAXY}
 pluto -c ../ build people.ini -o ${build_dir} -d ${build_dir} -t planet
+# TODO: dinamicaly get ini files
 for PLANET in design desktop edited quality security summer-coding ; do
     mkdir -p ${build_dir}/${PLANET}
     cp -r ${build_dir}/css-v2 ${build_dir}/${PLANET}/css-v2

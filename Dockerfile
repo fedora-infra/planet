@@ -1,4 +1,4 @@
-FROM fedora:37
+FROM fedora:38
 
 RUN dnf update -y && \
     dnf install -y httpd rubygems gcc sqlite-devel ruby-devel python3-pip fedora-packager-kerberos && \
@@ -9,17 +9,11 @@ RUN sed -i 's/Listen 80$/Listen 8080/g' /etc/httpd/conf/httpd.conf && \
     chgrp -R 0 /run/httpd && \
     chmod -R g+rwX /etc/httpd /var/log/httpd /run/httpd
 
-COPY site site
+COPY site /var/www/html/
 COPY pluto pluto
-ADD krb5/krb5.conf /etc/
 
 WORKDIR /pluto
-RUN python3 create_build_files.py
 RUN bundle install
-RUN ./build-planets.sh
-
-WORKDIR /
-RUN mv site/* /var/www/html/
 
 EXPOSE 8080
 

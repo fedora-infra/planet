@@ -11,6 +11,8 @@ RUN sed -i 's/Listen 80$/Listen 8080/g' /etc/httpd/conf/httpd.conf && \
 
 COPY site /var/www/html/
 COPY pluto pluto
+RUN chgrp -R 0 /pluto /var/www/html/ && \
+    chmod -R g=u /pluto /var/www/html/
 
 WORKDIR /pluto
 RUN bundle install

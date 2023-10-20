@@ -6,7 +6,7 @@ import requests
 import hashlib
 
 
-build_dir = "build/"
+build_dir = "/pluto/build"
 fedora_planet_url = "https://fedoraplanet.org/"
 
 std_people_ini_content = """
@@ -58,7 +58,7 @@ users = json.loads(
 )
 
 # writing headers ini file -> pluto use this to create tables in SQLite
-with open(build_dir + "planet.ini", "a") as f:
+with open(f"{build_dir}/planet.ini", "a") as f:
   f.write(f"title = Fedora People\n")
   f.write(f"url = {fedora_planet_url}\n\n")
   f.write(std_people_ini_content + "\n")
@@ -70,7 +70,7 @@ for user in list(users['result']):
       r = requests.get(user['rssurl'])
 
       if r.status_code==200:
-        with open(build_dir + 'planet.ini',"a") as f:
+        with open(f"{build_dir}/planet.ini","a") as f:
           f.write(f"[{user['username']}]\n  ")
           f.write(f"name = {user['human_name']}\n  ")
           f.write(f"link = {user['website']}\n  ")
@@ -81,4 +81,4 @@ for user in list(users['result']):
       print(e)
 
 # build planet with pluto
-subprocess.call(f'pluto build /pluto/build/planet.ini -o /var/www/html -d /var/www/html -t planet', shell=True)
+subprocess.call(f'cd /pluto; pluto build {build_dir}/planet.ini -o /var/www/html -d /var/www/html -t planet', shell=True)

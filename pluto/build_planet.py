@@ -52,7 +52,7 @@ subprocess.call('rm -rf ' + build_dir, shell=True)
 subprocess.run(['mkdir', '-p', build_dir])
 
 if os.environ.get('OPENSHIFT_BUILD_REFERENCE') == 'staging':
-  subprocess.call(f'kinit -kt {os.environ.get('KRB5_CLIENT_KTNAME')} HTTP/{fedora_planet_url_stg}@STG.FEDORAPROJECT.ORG', shell=True)
+  subprocess.call(f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_planet_url_stg}@STG.FEDORAPROJECT.ORG', shell=True)
 
   users = json.loads(
     subprocess.check_output(
@@ -62,7 +62,7 @@ if os.environ.get('OPENSHIFT_BUILD_REFERENCE') == 'staging':
     )
   )
 else:
-  subprocess.call(f'kinit -kt {os.environ.get('KRB5_CLIENT_KTNAME')} HTTP/{fedora_planet_url_prod}@FEDORAPROJECT.ORG', shell=True)
+  subprocess.call(f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_planet_url_prod}@FEDORAPROJECT.ORG', shell=True)
 
   users = json.loads(
     subprocess.check_output(

@@ -4,10 +4,12 @@ import subprocess
 import json
 import requests
 import hashlib
+import os
 
 
 build_dir = "/pluto/build"
-fedora_planet_url = "https://fedoraplanet.org/"
+fedora_planet_url_prod = "planet.apps.ocp.fedoraproject.org"
+fedora_planet_url_stg = "planet.apps.ocp.stg.fedoraproject.org"
 
 std_people_ini_content = """
 [fedorauniversity]
@@ -49,18 +51,31 @@ std_people_ini_content = """
 subprocess.call('rm -rf ' + build_dir, shell=True)
 subprocess.run(['mkdir', '-p', build_dir])
 
-users = json.loads(
-  subprocess.check_output(
-    f"/usr/bin/curl -u : --negotiate 'https://fasjson.fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
-    shell=True,
-    text=True
+if os.environ.get('OPENSHIFT_BUILD_REFERENCE') == 'staging':
+  subprocess.call(f'kinit -kt {os.environ.get('KRB5_CLIENT_KTNAME')} HTTP/{fedora_planet_url_stg}@STG.FEDORAPROJECT.ORG', shell=True)
+
+  users = json.loads(
+    subprocess.check_output(
+      f"/usr/bin/curl -u : --negotiate 'https://fasjson.stg.fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
+      shell=True,
+      text=True
+    )
   )
-)
+else:
+  subprocess.call(f'kinit -kt {os.environ.get('KRB5_CLIENT_KTNAME')} HTTP/{fedora_planet_url_prod}@FEDORAPROJECT.ORG', shell=True)
+
+  users = json.loads(
+    subprocess.check_output(
+      f"/usr/bin/curl -u : --negotiate 'https://fasjson.fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
+      shell=True,
+      text=True
+    )
+  )
 
 # writing headers ini file -> pluto use this to create tables in SQLite
 with open(f"{build_dir}/planet.ini", "a") as f:
   f.write(f"title = Fedora People\n")
-  f.write(f"url = {fedora_planet_url}\n\n")
+  f.write(f"url = {fedora_planet_url_prod}\n\n")
   f.write(std_people_ini_content + "\n")
 
 # append users blog in ini file

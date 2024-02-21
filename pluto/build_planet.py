@@ -11,66 +11,65 @@ build_dir = "/pluto/build"
 fedora_planet_url_prod = "planet.apps.ocp.fedoraproject.org"
 fedora_planet_url_stg = "planet.apps.ocp.stg.fedoraproject.org"
 
-std_people_ini_content = """
+if os.environ.get('OPENSHIFT_BUILD_REFERENCE') == 'staging':
+  fedora_planet_url = fedora_planet_url_stg
+  env = "STG."
+else:
+  fedora_planet_url = fedora_planet_url_prod
+  env = ""
+
+std_people_ini_content = f"""
 [fedorauniversity]
   name = Fedora University Tour
-  link = http://fedorauniversity.wordpress.com
-  feed = http://fedorauniversity.wordpress.com/feed/
+  link = https://fedorauniversity.wordpress.com
+  feed = https://fedorauniversity.wordpress.com/feed/
+  avatar = https://{fedora_planet_url}/images-v2/heads/default.png
   author = admin
 
 [fedoramagazine]
   name = Fedora Magazine
-  link = http://fedoramagazine.org
-  feed = http://fedoramagazine.org/?feed=rss2
-  avatar = http://fedoraplanet.org/images-v2/heads/planet-magazine.png
+  link = https://fedoramagazine.org
+  feed = https://fedoramagazine.org/?feed=rss2
+  avatar = https://{fedora_planet_url}/images-v2/heads/planet-magazine.png
   author = admin
 
 [fedora-badges]
   name = Fedora Badges
-  link = https://badges.fedoraproject.org/explore
+  link = https://badges.fedoraproject.org
   feed = https://badges.fedoraproject.org/explore/badges/rss
-  avatar = http://fedoraplanet.org/images-v2/heads/default.png
+  avatar = https://{fedora_planet_url}/images-v2/heads/default.png
   author = admin
 
 [fedora-status]
   name = Fedora Infrastructure Status
-  link = http://status.fedoraproject.org
-  feed = http://status.fedoraproject.org/changes.rss
-  avatar = http://fedoraplanet.org/images-v2/heads/default.png
+  link = https://status.fedoraproject.org
+  feed = https://status.fedoraproject.org/changes.rss
+  avatar = https://{fedora_planet_url}/images-v2/heads/default.png
   author = admin
 
 [community-blog]
   name = Fedora Community Blog
-  link = http://communityblog.fedoraproject.org
-  feed = http://communityblog.fedoraproject.org/?feed=rss
-  avatar = https://communityblog.fedoraproject.org/wp-content/themes/communityblog-theme-0.02/images/communitybloglogo.png
+  link = https://communityblog.fedoraproject.org
+  feed = https://communityblog.fedoraproject.org/?feed=rss
+  avatar = https://{fedora_planet_url}/images-v2/heads/default.png
   author = admin
 """
 
-
+# Reset directories
 subprocess.call('rm -rf ' + build_dir, shell=True)
 subprocess.run(['mkdir', '-p', build_dir])
 
-if os.environ.get('OPENSHIFT_BUILD_REFERENCE') == 'staging':
-  subprocess.call(f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_planet_url_stg}@STG.FEDORAPROJECT.ORG', shell=True)
+# Kerberos login
+subprocess.call(f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_planet_url}@{env}FEDORAPROJECT.ORG', shell=True)
 
-  users = json.loads(
-    subprocess.check_output(
-      f"/usr/bin/curl -u : --negotiate 'https://fasjson.stg.fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
-      shell=True,
-      text=True
-    )
+# Get data from fasjson
+users = json.loads(
+  subprocess.check_output(
+    f"/usr/bin/curl -u : --negotiate 'https://fasjson.stg.fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
+    shell=True,
+    text=True
   )
-else:
-  subprocess.call(f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_planet_url_prod}@FEDORAPROJECT.ORG', shell=True)
-
-  users = json.loads(
-    subprocess.check_output(
-      f"/usr/bin/curl -u : --negotiate 'https://fasjson.fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
-      shell=True,
-      text=True
-    )
-  )
+)
 
 # writing headers ini file -> pluto use this to create tables in SQLite
 with open(f"{build_dir}/planet.ini", "a") as f:

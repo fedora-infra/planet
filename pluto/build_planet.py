@@ -79,7 +79,7 @@ with open(f"{build_dir}/planet.ini", "a") as f:
 
 # append users blog in ini file
 for user in list(users['result']):
-  if user['rssurl'] != None:
+  if user['rssurl'] != None and user['rssurl'].split(":")[0] != 'http':
     try:
       r = requests.get(user['rssurl'])
 

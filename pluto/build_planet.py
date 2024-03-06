@@ -5,6 +5,7 @@ import json
 import requests
 import hashlib
 import os
+import shutil
 
 
 build_dir = "/pluto/build"
@@ -56,6 +57,11 @@ std_people_ini_content = f"""
 """
 
 # Reset directories
+if not os.path.exists("/var/www/html/images-v2"):
+  shutil.move("/pluto/images-v2","/var/www/html/")
+if not os.path.exists("/var/www/html/css-v2"):
+  shutil.move("/pluto/css-v2","/var/www/html/")
+
 subprocess.call('rm -rf ' + build_dir, shell=True)
 subprocess.run(['mkdir', '-p', build_dir])
 

@@ -71,7 +71,7 @@ subprocess.call(f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_
 # Get data from fasjson
 users = json.loads(
   subprocess.check_output(
-    f"/usr/bin/curl -u : --negotiate 'https://fasjson.stg.fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
+    f"/usr/bin/curl -u : --negotiate 'https://fasjson.{env.lower()}fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
     shell=True,
     text=True
   )

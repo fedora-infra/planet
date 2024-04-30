@@ -45,3 +45,7 @@ If you have a suggestion that would make this better, please fork the repo and c
 3. Commit your Changes (git commit -sm 'Add some AmazingFeature')
 4. Push to the Branch (git push origin feature/AmazingFeature)
 5. Open a Pull Request
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](https://github.com/fedora-infra/planet/blob/main/LICENSE) file for details.

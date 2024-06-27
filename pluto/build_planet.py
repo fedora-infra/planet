@@ -7,6 +7,8 @@ import hashlib
 import os
 import shutil
 
+import fasjson_client
+
 
 build_dir = "/pluto/build"
 fedora_planet_url_prod = "planet.apps.ocp.fedoraproject.org"
@@ -69,12 +71,13 @@ subprocess.run(['mkdir', '-p', build_dir])
 subprocess.call(f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_planet_url}@{env}FEDORAPROJECT.ORG', shell=True)
 
 # Get data from fasjson
-users = json.loads(
-  subprocess.check_output(
-    f"/usr/bin/curl -u : --negotiate 'https://fasjson.{env.lower()}fedoraproject.org/v1/groups/fedora-contributor/members/' -H 'X-Fields: username,human_name,website,rssurl,emails'",
-    shell=True,
-    text=True
-  )
+fasjson = fasjson_client.Client(f"https://fasjson.{env.lower()}fedoraproject.org")
+fasjson_response = fasjson.search(
+    rssurl="*",
+    group=["fedora-contributor"],
+    _request_options={
+        "headers": {"X-Fields": ["username", "human_name", "websites", "rssurls", "emails"]}
+    }
 )
 
 # writing headers ini file -> pluto use this to create tables in SQLite
@@ -84,21 +87,33 @@ with open(f"{build_dir}/planet.ini", "a") as f:
   f.write(std_people_ini_content + "\n")
 
 # append users blog in ini file
-for user in list(users['result']):
-  if user['rssurl'] != None and user['rssurl'].split(":")[0] != 'http':
-    try:
-      r = requests.get(user['rssurl'])
+while True:
+  for user in fasjson_response.result:
+    for rssindex, rssurl in enumerate(user["rssurls"]):
+      if rssurl.startswith("http://"):
+        print(f"User {user['username']} has a bad RSS URL: {rssurl}")
+        continue
+      try:
+        r = requests.get(rssurl)
 
-      if r.status_code==200:
-        with open(f"{build_dir}/planet.ini","a") as f:
-          f.write(f"[{user['username']}]\n  ")
-          f.write(f"name = {user['human_name']}\n  ")
-          f.write(f"link = {user['website']}\n  ")
-          f.write(f"feed = {user['rssurl']}\n  ")
-          f.write(f"avatar = https://www.libravatar.org/avatar/{hashlib.md5(user['emails'][0].encode()).hexdigest()}\n  ")
-          f.write(f"author = {user['username']}\n\n")
-    except Exception as e:
-      print(e)
+        if r.status_code==200:
+          with open(f"{build_dir}/planet.ini","a") as f:
+            f.write(f"[{user['username']}_{rssindex + 1}]\n  ")
+            f.write(f"name = {user['human_name']}\n  ")
+            try:
+              f.write(f"link = {user['websites'][0]}\n  ")
+            except (TypeError, IndexError):
+              # It can be either None (TypeError) or an empty list (IndexError)
+              print(f"User {user['username']} has a RSS URL but no website.")
+            f.write(f"feed = {rssurl}\n  ")
+            f.write(f"avatar = https://www.libravatar.org/avatar/{hashlib.md5(user['emails'][0].encode()).hexdigest()}\n  ")
+            f.write(f"author = {user['username']}\n\n")
+      except Exception as e:
+        print(e)
+  try:
+    fasjson_response = fasjson_response.next_page()
+  except fasjson_client.response.PaginationError:
+    break
 
 # build planet with pluto
 subprocess.call(f'cd /pluto; pluto build {build_dir}/planet.ini -o /var/www/html -d /var/www/html -t planet', shell=True)

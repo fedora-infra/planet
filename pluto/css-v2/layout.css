@@ -126,7 +126,7 @@ a[name] {
 #fedora-side-left {
 	position: absolute;
 	z-index: 2;
-	width: 11em; 
+	width: 11em;
 	/* Space down for the approx line height (fonts) */
 	left: 12px;
 }

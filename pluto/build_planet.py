@@ -1,21 +1,19 @@
 #!/usr/bin/python3
 
 import subprocess
-import json
 import requests
 import hashlib
 import os
 import shutil
 import logging
-from datetime import datetime
 
 import fasjson_client
-from fedora_messaging import api, config
+from fedora_messaging import api
 
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=f"/var/log/planet/build.log",
+    filename="/var/log/planet/build.log",
     encoding="utf-8",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -99,7 +97,7 @@ fasjson_response = fasjson.search(
 
 # writing headers ini file -> pluto use this to create tables in SQLite
 with open(f"{build_dir}/planet.ini", "a") as f:
-    f.write(f"title = Fedora People\n")
+    f.write("title = Fedora People\n")
     f.write(f"url = {fedora_planet_url_prod}\n\n")
     f.write(std_people_ini_content + "\n")
 
@@ -129,9 +127,8 @@ while True:
                             f"avatar = https://www.libravatar.org/avatar/{hashlib.md5(user['emails'][0].encode()).hexdigest()}\n  "
                         )
                         f.write(f"author = {user['username']}\n\n")
-            except Exception as e:
-                print(e)
-                logger.error(f"Error when requesting RSS URL: {e}")
+            except Exception:
+                logger.exception("Error when requesting RSS URL")
     try:
         fasjson_response = fasjson_response.next_page()
     except fasjson_client.response.PaginationError:
@@ -144,8 +141,8 @@ try:
         f"cd /pluto; pluto build {build_dir}/planet.ini -o /var/www/html -d /var/www/html -t planet",
         shell=True,
     )
-except Exception as e:
-    logger.error(f"Error during the pluto build: {e}")
+except Exception:
+    logger.exception("Error during the pluto build")
 
 # send to fedora messaging
 planet_users = dict()
@@ -163,6 +160,6 @@ with open(f"{build_dir}/planet.ini", "r") as f:
             planet_users[username][key.strip()] = value.strip()
 
 try:
-    api.publish(api.Message(topic=f"planet.build", body={"Users": planet_users}))
-except Exception as e:
-    logger.error(f"Error when trying to publish message: {e}")
+    api.publish(api.Message(topic="planet.build", body={"Users": planet_users}))
+except Exception:
+    logger.exception("Error when trying to publish message")

@@ -8,6 +8,7 @@ import os
 import shutil
 
 import fasjson_client
+from fedora_messaging import api, config
 
 
 build_dir = "/pluto/build"
@@ -86,6 +87,9 @@ with open(f"{build_dir}/planet.ini", "a") as f:
   f.write(f"url = {fedora_planet_url_prod}\n\n")
   f.write(std_people_ini_content + "\n")
 
+with open(f"{build_dir}/planet.json","w") as f:
+  f.write("{\n  ")
+
 # append users blog in ini file
 while True:
   for user in fasjson_response.result:
@@ -108,6 +112,19 @@ while True:
             f.write(f"feed = {rssurl}\n  ")
             f.write(f"avatar = https://www.libravatar.org/avatar/{hashlib.md5(user['emails'][0].encode()).hexdigest()}\n  ")
             f.write(f"author = {user['username']}\n\n")
+          
+          # Creating json for fedora messaging
+          with open(f"{build_dir}/planet.json","a") as f:
+            f.write(f"{user['username']}_{rssindex + 1}]\n  ")
+            f.write(f"name = {user['human_name']}\n  ")
+            try:
+              f.write(f"link = {user['websites'][0]}\n  ")
+            except (TypeError, IndexError):
+              # It can be either None (TypeError) or an empty list (IndexError)
+              print(f"User {user['username']} has a RSS URL but no website.")
+            f.write(f"feed = {rssurl}\n  ")
+            f.write(f"avatar = https://www.libravatar.org/avatar/{hashlib.md5(user['emails'][0].encode()).hexdigest()}\n  ")
+            f.write(f"author = {user['username']}\n\n")
       except Exception as e:
         print(e)
   try:
@@ -115,5 +132,14 @@ while True:
   except fasjson_client.response.PaginationError:
     break
 
+with open(f"{build_dir}/planet.json","a") as f:
+  f.write("}")
+
 # build planet with pluto
 subprocess.call(f'cd /pluto; pluto build {build_dir}/planet.ini -o /var/www/html -d /var/www/html -t planet', shell=True)
+
+# send to fedora messaging
+with open(f'{build_dir}/planet.json','r') as f:
+  planet_users = json.load(f)
+
+api.publish(api.Message(topic="Planet build", body={"Users": planet_users}))

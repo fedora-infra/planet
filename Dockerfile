@@ -1,4 +1,4 @@
-FROM fedora:38
+FROM fedora:39
 
 RUN dnf update -y && \
     dnf install -y httpd rubygems gcc sqlite-devel ruby-devel python3-pip fedora-packager-kerberos python3-fasjson-client && \

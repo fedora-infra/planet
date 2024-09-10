@@ -13,8 +13,6 @@ RUN mkdir -p /etc/fedora-messaging /etc/pki/fedora-messaging && \
     chmod -R g+rwX /etc/httpd /var/log/httpd /run/httpd /var/www/html /pluto /etc/fedora-messaging && \
     chmod +x /pluto/build_planet.py
 
-COPY pluto/config.toml /etc/fedora-messaging/config.toml 
-
 WORKDIR /pluto
 RUN bundle install
 

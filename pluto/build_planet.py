@@ -17,11 +17,9 @@ fedora_planet_url_stg = "stg.fedoraplanet.org"
 
 if os.environ.get("OPENSHIFT_BUILD_REFERENCE") == "staging":
     fedora_planet_url = fedora_planet_url_stg
-    fedora_messaging_prefix = "org.fedoraproject.stg.planet"
     env = "STG."
 else:
     fedora_planet_url = fedora_planet_url_prod
-    fedora_messaging_prefix = "org.fedoraproject.prod.planet"
     env = ""
 
 std_people_ini_content = f"""
@@ -149,5 +147,5 @@ with open(f"{build_dir}/planet.ini", "r") as f:
             planet_users[username][key.strip()] = value.strip()
 
 api.publish(
-    api.Message(topic=f"{fedora_messaging_prefix}.build", body={"Users": planet_users})
+    api.Message(topic=f"planet.build", body={"Users": planet_users})
 )

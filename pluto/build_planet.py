@@ -6,10 +6,27 @@ import requests
 import hashlib
 import os
 import shutil
+import logging
+from datetime import datetime
 
 import fasjson_client
 from fedora_messaging import api, config
 
+
+today = (
+    datetime.now().strftime("%y")
+    + datetime.now().strftime("%m")
+    + datetime.now().strftime("%d")
+)
+
+logger = logging.getLogger(__name__)
+logging.basicConfig(
+    filename=f"/var/log/pluto/{today}.log",
+    encoding="utf-8",
+    level=logging.DEBUG,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt="%Y/%m/%d %I:%M:%S %p",
+)
 
 build_dir = "/pluto/build"
 fedora_planet_url_prod = "fedoraplanet.org"
@@ -120,16 +137,21 @@ while True:
                         f.write(f"author = {user['username']}\n\n")
             except Exception as e:
                 print(e)
+                logger.error(f"Error when requesting RSS URL: {e}")
     try:
         fasjson_response = fasjson_response.next_page()
     except fasjson_client.response.PaginationError:
+        logger.error("Fasjson client pagination error")
         break
 
 # build planet with pluto
-subprocess.call(
-    f"cd /pluto; pluto build {build_dir}/planet.ini -o /var/www/html -d /var/www/html -t planet",
-    shell=True,
-)
+try:
+    subprocess.call(
+        f"cd /pluto; pluto build {build_dir}/planet.ini -o /var/www/html -d /var/www/html -t planet",
+        shell=True,
+    )
+except Exception as e:
+    logger.error(f"Error during the pluto build: {e}")
 
 # send to fedora messaging
 planet_users = dict()
@@ -146,6 +168,7 @@ with open(f"{build_dir}/planet.ini", "r") as f:
             key, value = line.split("=", 1)
             planet_users[username][key.strip()] = value.strip()
 
-api.publish(
-    api.Message(topic=f"planet.build", body={"Users": planet_users})
-)
+try:
+    api.publish(api.Message(topic=f"planet.build", body={"Users": planet_users}))
+except Exception as e:
+    logger.error(f"Error when trying to publish message: {e}")

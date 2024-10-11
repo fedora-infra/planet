@@ -6,6 +6,7 @@ RUN dnf update -y && \
     dnf clean all 
 
 COPY pluto pluto
+COPY httpd.conf /etc/httpd/conf/
 
 RUN mkdir -p /etc/fedora-messaging /etc/pki/fedora-messaging /var/log/pluto && \
     sed -i 's/Listen 80$/Listen 8080/g' /etc/httpd/conf/httpd.conf && \

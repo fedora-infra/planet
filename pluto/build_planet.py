@@ -172,3 +172,11 @@ try:
     api.publish(api.Message(topic=f"planet.build", body={"Users": planet_users}))
 except Exception as e:
     logger.error(f"Error when trying to publish message: {e}")
+
+tail_command = [
+    "tail",
+    "-qf",
+    "/etc/httpd/logs/access_log",
+    "/etc/httpd/logs/error_log",
+]
+tail_process = subprocess.Popen(tail_command)

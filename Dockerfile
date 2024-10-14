@@ -8,16 +8,15 @@ RUN dnf update -y && \
 COPY pluto pluto
 COPY httpd.conf /etc/httpd/conf/
 
-RUN mkdir -p /etc/fedora-messaging /etc/pki/fedora-messaging /var/log/pluto && \
+RUN mkdir -p /etc/fedora-messaging /etc/pki/fedora-messaging /var/log/planet && \
     sed -i 's/Listen 80$/Listen 8080/g' /etc/httpd/conf/httpd.conf && \
     chgrp -R 0 /run/httpd /var/www/html /pluto /etc/fedora-messaging && \
-    chmod -R g+rwX /etc/httpd /var/log/httpd /var/log/pluto /run/httpd /var/www/html /pluto /etc/fedora-messaging && \
-    chmod +x /pluto/build_planet.py
+    chmod -R g+rwX /etc/httpd /var/log/httpd /var/log/planet /run/httpd /var/www/html /pluto /etc/fedora-messaging && \
+    chmod +x /pluto/build_planet.py /pluto/start.sh
 
 WORKDIR /pluto
 RUN bundle install
 
 EXPOSE 8080
 
-ENTRYPOINT ["/usr/sbin/httpd"]
-CMD ["-D","FOREGROUND","-f","/etc/httpd/conf/httpd.conf"]
+ENTRYPOINT ["/pluto/start.sh"]

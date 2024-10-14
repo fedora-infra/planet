@@ -21,7 +21,7 @@ today = (
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename=f"/var/log/pluto/{today}.log",
+    filename=f"/var/log/planet/build.log",
     encoding="utf-8",
     level=logging.DEBUG,
     format="%(asctime)s - %(levelname)s - %(message)s",
@@ -172,11 +172,3 @@ try:
     api.publish(api.Message(topic=f"planet.build", body={"Users": planet_users}))
 except Exception as e:
     logger.error(f"Error when trying to publish message: {e}")
-
-tail_command = [
-    "tail",
-    "-qf",
-    "/etc/httpd/logs/access_log",
-    "/etc/httpd/logs/error_log",
-]
-tail_process = subprocess.Popen(tail_command)

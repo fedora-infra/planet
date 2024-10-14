@@ -13,17 +13,11 @@ import fasjson_client
 from fedora_messaging import api, config
 
 
-today = (
-    datetime.now().strftime("%y")
-    + datetime.now().strftime("%m")
-    + datetime.now().strftime("%d")
-)
-
 logger = logging.getLogger(__name__)
 logging.basicConfig(
     filename=f"/var/log/planet/build.log",
     encoding="utf-8",
-    level=logging.DEBUG,
+    level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y/%m/%d %I:%M:%S %p",
 )

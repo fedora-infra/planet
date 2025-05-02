@@ -2,4 +2,5 @@ source "https://rubygems.org"
 
 gem "pluto"
 gem "rss"
-gem "activerecord", '6.1.4.4'
+gem "activerecord"
+gem 'sqlite3'

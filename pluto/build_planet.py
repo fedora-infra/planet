@@ -6,21 +6,30 @@ import hashlib
 import os
 import shutil
 import logging
+import datetime
+import sqlite3
+import traceback
+import sys
 
+import backoff
 import fasjson_client
 from fedora_messaging import api
+from fedora_messaging.exceptions import ConnectionException, PublishException
+from fedora_planet_messages import PostNew
 
+
+build_dir = os.getenv("PLANET_BUILD_DIR", "/pluto/build")
+dest_dir = os.getenv("PLANET_DEST_DIR", "/var/www/html")
+log_dir = os.getenv("PLANET_LOG_DIR", "/var/log/planet")
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(
-    filename="/var/log/planet/build.log",
+    filename=os.path.join(log_dir, "build.log"),
     encoding="utf-8",
     level=logging.INFO,
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt="%Y/%m/%d %I:%M:%S %p",
 )
-
-build_dir = "/pluto/build"
 fedora_planet_url_prod = "fedoraplanet.org"
 fedora_planet_url_stg = "stg.fedoraplanet.org"
 
@@ -69,13 +78,16 @@ std_people_ini_content = f"""
 """
 
 # Reset directories
-if not os.path.exists("/var/www/html/images-v2"):
-    shutil.move("/pluto/images-v2", "/var/www/html/")
-if not os.path.exists("/var/www/html/css-v2"):
-    shutil.move("/pluto/css-v2", "/var/www/html/")
+if not os.path.exists(dest_dir):
+    os.makedirs(dest_dir)
+for static_dir in ("images-v2", "css-v2"):
+    if not os.path.exists(os.path.join(dest_dir, static_dir)):
+        shutil.copytree(
+            os.path.join("pluto", static_dir), os.path.join(dest_dir, static_dir)
+        )
 
-subprocess.call("rm -rf " + build_dir, shell=True)
-subprocess.run(["mkdir", "-p", build_dir])
+shutil.rmtree(build_dir)
+os.makedirs(build_dir)
 
 # Kerberos login
 subprocess.call(
@@ -95,8 +107,9 @@ fasjson_response = fasjson.search(
     },
 )
 
+ini_file = os.path.join(build_dir, "planet.ini")
 # writing headers ini file -> pluto use this to create tables in SQLite
-with open(f"{build_dir}/planet.ini", "a") as f:
+with open(ini_file, "a") as f:
     f.write("title = Fedora People\n")
     f.write(f"url = {fedora_planet_url_prod}\n\n")
     f.write(std_people_ini_content + "\n")
@@ -104,22 +117,23 @@ with open(f"{build_dir}/planet.ini", "a") as f:
 # append users blog in ini file
 while True:
     for user in fasjson_response.result:
+        logger.info("Adding user %s", user["username"])
         for rssindex, rssurl in enumerate(user["rssurls"]):
             if rssurl.startswith("http://"):
-                print(f"User {user['username']} has a bad RSS URL: {rssurl}")
+                logger.warning(f"User {user['username']} has a bad RSS URL: {rssurl}")
                 continue
             try:
                 r = requests.get(rssurl)
 
                 if r.status_code == 200:
-                    with open(f"{build_dir}/planet.ini", "a") as f:
+                    with open(ini_file, "a") as f:
                         f.write(f"[{user['username']}_{rssindex + 1}]\n  ")
                         f.write(f"name = {user['human_name']}\n  ")
                         try:
                             f.write(f"link = {user['websites'][0]}\n  ")
                         except (TypeError, IndexError):
                             # It can be either None (TypeError) or an empty list (IndexError)
-                            print(
+                            logger.warning(
                                 f"User {user['username']} has a RSS URL but no website."
                             )
                         f.write(f"feed = {rssurl}\n  ")
@@ -135,16 +149,75 @@ while True:
         logger.error("Fasjson client pagination error")
         break
 
+
+def backoff_hdlr(details):
+    logger.warning(
+        "Publishing message failed. Retrying. %s",
+        traceback.format_tb(sys.exc_info()[2]),
+    )
+
+
+def giveup_hdlr(details):
+    logger.error(
+        "Publishing message failed. Giving up. %s",
+        traceback.format_tb(sys.exc_info()[2]),
+    )
+
+
+@backoff.on_exception(
+    backoff.expo,
+    (ConnectionException, PublishException),
+    max_tries=3,
+    on_backoff=backoff_hdlr,
+    on_giveup=giveup_hdlr,
+)
+def publish(message):
+    api.publish(message)
+
+
+def send_fedora_messages(after):
+    db_con = sqlite3.connect(os.path.join(dest_dir, "planet.db"))
+    with db_con:
+        cursor = db_con.cursor()
+        result = cursor.execute(
+            """
+            SELECT f.author, f.avatar, f.auto_title, i.title, i.url
+            FROM items i JOIN feeds f ON i.feed_id = f.id
+            WHERE i.created_at > ? ORDER BY i.created_at ;
+            """,
+            (after.isoformat(sep=" "),),
+        )
+        for row in result:
+            message = PostNew(
+                topic="planet.post.new",
+                body={
+                    "username": row[0],
+                    "face": row[1],
+                    "name": row[2],
+                    "post": {
+                        "title": row[3],
+                        "url": row[4],
+                    },
+                },
+            )
+            logger.info(f"Sending message {message.id}: {message}")
+            publish(message)
+
+
 # build planet with pluto
+logger.info("Building planet with pluto")
+start_time = datetime.datetime.now(tz=datetime.timezone.utc)
 try:
     subprocess.call(
-        f"cd /pluto; pluto build {build_dir}/planet.ini -o /var/www/html -d /var/www/html -t planet",
-        shell=True,
+        ["pluto", "build", ini_file, "-o", dest_dir, "-d", dest_dir, "-t", "planet"],
+        cwd="pluto",
     )
 except Exception:
     logger.exception("Error during the pluto build")
 
 # send to fedora messaging
+send_fedora_messages(after=start_time)
+
 planet_users = dict()
 username = None
 with open(f"{build_dir}/planet.ini", "r") as f:
@@ -160,6 +233,6 @@ with open(f"{build_dir}/planet.ini", "r") as f:
             planet_users[username][key.strip()] = value.strip()
 
 try:
-    api.publish(api.Message(topic="planet.build", body={"Users": planet_users}))
+    publish(api.Message(topic="planet.build", body={"Users": planet_users}))
 except Exception:
     logger.exception("Error when trying to publish message")

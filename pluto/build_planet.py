@@ -18,7 +18,7 @@ import backoff
 import fasjson_client
 from fedora_messaging import api
 from fedora_messaging.exceptions import ConnectionException, PublishException
-from fedora_planet_messages import PostNew
+from fedora_planet_messages import PostNew, Build
 
 
 logger = logging.getLogger(__name__)
@@ -216,7 +216,6 @@ def _send_fedora_messages(dest_dir, after):
         )
         for row in result:
             message = PostNew(
-                topic="planet.post.new",
                 body={
                     "username": row[0],
                     "face": row[1],
@@ -238,7 +237,15 @@ def _send_final_message(ini_content):
         if section is not configparser.UNNAMED_SECTION
     }
     try:
-        publish(api.Message(topic="planet.build", body={"Users": planet_users}))
+        publish(
+            Build(
+                body={
+                    "title": ini_content.get(configparser.UNNAMED_SECTION, "title"),
+                    "url": ini_content.get(configparser.UNNAMED_SECTION, "url"),
+                    "Users": planet_users,
+                }
+            )
+        )
     except Exception:
         logger.exception("Error when trying to publish message")
 

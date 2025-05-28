@@ -1,24 +1,25 @@
 #!/usr/bin/python3
 
-import subprocess
-import requests
+import configparser
+import contextlib
+import datetime
 import hashlib
+import logging
 import os
 import shutil
-import logging
-import datetime
 import sqlite3
-import traceback
+import subprocess
 import sys
-import configparser
+import traceback
 from argparse import ArgumentParser
 from pathlib import Path
 
 import backoff
 import fasjson_client
+import requests
 from fedora_messaging import api
 from fedora_messaging.exceptions import ConnectionException, PublishException
-from fedora_planet_messages import PostNew, Build
+from fedora_planet_messages import Build, PostNew
 
 
 logger = logging.getLogger(__name__)
@@ -79,20 +80,26 @@ def build_ini_file(ini_file, ini_content):
     _add_basic_config(ini_content)
 
     # Kerberos login
-    subprocess.call(
-        f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} HTTP/{fedora_planet_url}@{env}FEDORAPROJECT.ORG',
+    subprocess.call(  # noqa: S602
+        (
+            f'kinit -kt {os.environ.get("KRB5_CLIENT_KTNAME")} '
+            f"HTTP/{fedora_planet_url}@{env}FEDORAPROJECT.ORG"
+        ),
         shell=True,
     )
 
     for user_section in _get_user_sections():
         ini_content.read_dict(user_section)
 
-    os.makedirs(os.path.dirname(ini_file))
+    with contextlib.suppress(FileExistsError):
+        os.makedirs(os.path.dirname(ini_file))
     # writing headers ini file -> pluto use this to create tables in SQLite
     with open(ini_file, "w") as f:
         f.write("title = Fedora People\n")
         f.write(f"url = {fedora_planet_url}\n\n")
         ini_content.write(f)
+    # Re-read the ini file to get the UNNAMED_SECTION content
+    ini_content.read(ini_file)
 
 
 def _get_user_sections():
@@ -102,9 +109,7 @@ def _get_user_sections():
         rssurl="*",
         group=["fedora-contributor"],
         _request_options={
-            "headers": {
-                "X-Fields": ["username", "human_name", "websites", "rssurls", "emails"]
-            }
+            "headers": {"X-Fields": ["username", "human_name", "websites", "rssurls", "emails"]}
         },
     )
 
@@ -114,38 +119,38 @@ def _get_user_sections():
             logger.info("Adding user %s", user["username"])
             for rssindex, rssurl in enumerate(user["rssurls"]):
                 if rssurl.startswith("http://"):
-                    logger.warning(
-                        f"User {user['username']} has a bad RSS URL: {rssurl}"
-                    )
+                    logger.warning(f"User {user['username']} has a bad RSS URL: {rssurl}")
                     continue
                 try:
-                    r = requests.get(rssurl)
-
-                    if r.status_code == 200:
-                        section = f"{user['username']}_{rssindex + 1}"
-                        avatar_hash = hashlib.md5(
-                            user["emails"][0].encode()
-                        ).hexdigest()
-                        content = {
-                            "name": user["human_name"],
-                            "feed": rssurl,
-                            "author": user["username"],
-                            "avatar": f"https://www.libravatar.org/avatar/{avatar_hash}",
-                        }
-                        try:
-                            content["link"] = user["websites"][0]
-                        except (TypeError, IndexError):
-                            # It can be either None (TypeError) or an empty list (IndexError)
-                            logger.warning(
-                                f"User {user['username']} has a RSS URL but no website."
-                            )
-                        yield {section: content}
+                    r = requests.head(rssurl, timeout=10)
+                    if not r.ok:
+                        logger.warning(
+                            "User %s's RSS URL returned code %s (%s)",
+                            user["username"],
+                            r.status_code,
+                            rssurl,
+                        )
+                        continue
+                    section = f"{user['username']}_{rssindex + 1}"
+                    avatar_hash = hashlib.md5(user["emails"][0].encode()).hexdigest()  # noqa: S324
+                    content = {
+                        "name": user["human_name"],
+                        "feed": rssurl,
+                        "author": user["username"],
+                        "avatar": f"https://www.libravatar.org/avatar/{avatar_hash}",
+                    }
+                    try:
+                        content["link"] = user["websites"][0]
+                    except (TypeError, IndexError):
+                        # It can be either None (TypeError) or an empty list (IndexError)
+                        logger.warning(f"User {user['username']} has a RSS URL but no website.")
+                    yield {section: content}
                 except Exception:
                     logger.exception("Error when requesting RSS URL")
         try:
             fasjson_response = fasjson_response.next_page()
         except fasjson_client.response.PaginationError:
-            logger.error("Fasjson client pagination error")
+            logger.debug("No more Fasjson pages")
             break
 
 
@@ -158,23 +163,22 @@ def _call_pluto(ini_file, dest_dir):
         static_path = dest_dir.joinpath(static_dir)
         if not static_path.exists():
             shutil.copytree(os.path.join("pluto", static_dir), static_path.as_posix())
+    command = [
+        "pluto",
+        "build",
+        ini_file,
+        "-o",
+        dest_dir.as_posix(),
+        "-d",
+        dest_dir.as_posix(),
+        "-t",
+        "planet",
+    ]
     try:
-        subprocess.call(
-            [
-                "pluto",
-                "build",
-                ini_file,
-                "-o",
-                dest_dir.as_posix(),
-                "-d",
-                dest_dir.as_posix(),
-                "-t",
-                "planet",
-            ],
-            cwd="pluto",
-        )
+        subprocess.call(command, cwd=os.path.dirname(__file__))  # noqa: S603
     except Exception:
-        logger.exception("Error during the pluto build")
+        logger.error("Error during the Pluto build (%s)", " ".join(command))
+        raise
 
 
 def _backoff_hdlr(details):
@@ -253,16 +257,10 @@ def _send_final_message(ini_content):
 def main():
     # Arguments
     parser = ArgumentParser()
-    parser.add_argument(
-        "-b", "--build-dir", default="/pluto/build", help="build directory"
-    )
-    parser.add_argument(
-        "-o", "--output-dir", default="/var/www/html", help="output directory"
-    )
+    parser.add_argument("-b", "--build-dir", default="/pluto/build", help="build directory")
+    parser.add_argument("-o", "--output-dir", default="/var/www/html", help="output directory")
     parser.add_argument("-l", "--log-dir", help="log directory")
-    parser.add_argument(
-        "-v", "--verbose", action="store_true", help="display more info"
-    )
+    parser.add_argument("-v", "--verbose", action="store_true", help="display more info")
     parser.add_argument("--skip-ini", action="store_true")
     parser.add_argument("--skip-pluto", action="store_true")
     args = parser.parse_args()

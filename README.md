@@ -7,9 +7,9 @@ Fedora Planet is a distributed communication tool that many Fedora contributors 
 
 Fedora Planet is using [pluto](https://github.com/feedreader/pluto) as a feed reader and is currently running on Openshift (OCP) in [staging](https://planet.apps.ocp.stg.fedoraproject.org/) and [production](https://fedoraplanet.org/).
 
-All modifications are applied through [Ansible](https://pagure.io/fedora-infra/ansible/blob/main/f/roles/openshift-apps/planet). The build is done by running the `build_planets.py` script, which is scheduled in cron, with the output files located in site/.
+All modifications are applied through [Ansible](https://pagure.io/fedora-infra/ansible/blob/main/f/roles/openshift-apps/planet). The build is done by running the `build_planet.py` script from within the `pluto` directory, which is scheduled in cron, with the output files located in site/.
 
-The script `build_planets.py` has, by default, references to official Fedora sites such as Fedora Magazine, badges, status, etc., and it uses queries through fasjson to collect the sites that users have added to their page on [Fedora Accounts](https://accounts.fedoraproject.org/).
+The script `build_planet.py` has, by default, references to official Fedora sites such as Fedora Magazine, badges, status, etc., and it uses queries through fasjson to collect the sites that users have added to their page on [Fedora Accounts](https://accounts.fedoraproject.org/).
 
 As it's provisioned on OCP, the Python script that executes the Pluto build is utilizing the environment variable `OPENSHIFT_BUILD_REFERENCE`.
 

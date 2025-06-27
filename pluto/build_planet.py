@@ -162,7 +162,7 @@ def _call_pluto(ini_file, dest_dir):
     for static_dir in ("images-v2", "css-v2"):
         static_path = dest_dir.joinpath(static_dir)
         if not static_path.exists():
-            shutil.copytree(os.path.join("pluto", static_dir), static_path.as_posix())
+            shutil.copytree(static_dir, static_path.as_posix())
     command = [
         "pluto",
         "build",

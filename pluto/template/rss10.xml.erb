@@ -13,7 +13,7 @@
     <description><%= CGI.escapeHTML(site.title) %><% if site.url %>: <%= CGI.escapeHTML(site.url) %><% end %></description>
     <items>
         <rdf:Seq>
-            <% items = site.items.latest.limit(24)
+            <% items = site.items.latest.limit(50)
             ItemCursor.new( items ).each do |item,new_date,new_feed| %>
             <rdf:li rdf:resource="<%= CGI.escapeHTML(item.guid) %>" />
             <% end %>
@@ -21,7 +21,7 @@
     </items>
 </channel>
 
-<% items = site.items.latest.limit(24)
+<% items = site.items.latest.limit(50)
 ItemCursor.new( items ).each do |item,new_date,new_feed| %>
 <item rdf:about="<%= CGI.escapeHTML(item.link) %>">
 <title><%= CGI.escapeHTML(item.feed.name) %><% if item.title %>: <%= CGI.escapeHTML(item.title) %><% end %></title>

@@ -63,7 +63,7 @@
 
 
     <%
-        items = site.items.latest.limit(24)
+        items = site.items.latest.limit(50)
         ItemCursor.new( items ).each do |item, new_date, new_feed|
     %>
     <div class="row m-b-3">
